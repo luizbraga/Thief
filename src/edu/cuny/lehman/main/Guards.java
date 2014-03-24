@@ -15,7 +15,6 @@ public class Guards {
 
    public void chase()
    {
-
    }
 
    public void catchThief()
