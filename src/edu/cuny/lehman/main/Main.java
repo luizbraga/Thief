@@ -6,8 +6,10 @@ import java.applet.*;
 
 public class Main extends Applet implements KeyListener, Runnable
 {
-	boolean[] pressed = new boolean[256];
+	boolean[] isPressed = new boolean[256];
 	Thread thread;
+
+	//Image img = Toolkit.getDefaultToolkit().getImage("thief_dn_0.png");
 
 	boolean upPressed = false;
 	boolean dnPressed = false;
@@ -43,13 +45,15 @@ public class Main extends Applet implements KeyListener, Runnable
 	int x = 0;
 	int y = 0;
 
+
 	//load the image
-	ImageLayer background = new ImageLayer("combo.gif");
+	//ImageLayer background = new ImageLayer("combo.gif");
+	SpriteAnimated thief = new SpriteAnimated(100, 100, "thief", 3, 4);
 
 	Image offScreen;
 	Graphics offScreen_g;
 
-	Thief thief;
+	//Thief thief;
 	//Initialize the applet
 	public void init()
 	{
@@ -59,7 +63,7 @@ public class Main extends Applet implements KeyListener, Runnable
 		requestFocus ();
 		addKeyListener(this);
 
-		thread= new Thread(this);
+		thread = new Thread(this);
 		thread.start();
 
 	}
@@ -71,17 +75,17 @@ public class Main extends Applet implements KeyListener, Runnable
 
 		{
 
-			if(pressed[KeyEvent.VK_UP])   thief.moveUpBy(10);
-			if(pressed[KeyEvent.VK_DOWN]) thief.moveDownBy(10);
-			if(pressed[KeyEvent.VK_LEFT])  background.moveLeftBy(5);
-			if(pressed[KeyEvent.VK_RIGHT]) background.moveRightBy(5);
+			if(isPressed[KeyEvent.VK_UP])   thief.moveUpBy(4); 
+			if(isPressed[KeyEvent.VK_DOWN]) thief.moveDownBy(4);
+			if(isPressed[KeyEvent.VK_LEFT])  thief.moveLeftBy(4);
+			if(isPressed[KeyEvent.VK_RIGHT]) thief.moveRightBy(4);
 
 			repaint();
 
 			try
 			{
 
-				Thread.sleep(15);
+				Thread.sleep(20);
 			}
 
 			catch(Exception x) {};
@@ -90,11 +94,13 @@ public class Main extends Applet implements KeyListener, Runnable
 
 	}
 
-	public void Paint(Graphics g)
+	public void paint(Graphics g)
 
 	{
-		background.draw(g);
+		//		background.draw(g);
 		thief.draw(g);
+		//g.drawRect(100, 100, 50, 50);
+		//g.drawImage(img, 100, 100, null);
 
 	}
 
@@ -107,36 +113,17 @@ public class Main extends Applet implements KeyListener, Runnable
 	}
 
 
-	public void keyPressed(int code)
+	public void keyPressed(KeyEvent e)
 	{
-		if(code == _UP)  upPressed = true;
-		if(code == _DN)  dnPressed = true;
-		if(code == _LT)  ltPressed = true;
-		if(code == _RT)  rtPressed = true;
+		isPressed[e.getKeyCode()] = true;
 	}
 
-
-	public void keyReleased(int code)
+	public void keyReleased(KeyEvent e)
 	{
-		if(code == _UP)  upPressed = false;
-		if(code == _DN)  dnPressed = false;
-		if(code == _LT)  ltPressed = false;
-		if(code == _RT)  rtPressed = false;
+		isPressed[e.getKeyCode()] = false;
 	}
 
-
-	public final void keyPressed(KeyEvent e)
-	{
-		keyPressed(e.getKeyCode());
-	}
-
-
-	public final void keyReleased(KeyEvent e)
-	{
-		keyReleased(e.getKeyCode());
-	}
-
-	public final void keyTyped(KeyEvent e) {   }
+	public void keyTyped(KeyEvent e) {  }
 
 
 }
