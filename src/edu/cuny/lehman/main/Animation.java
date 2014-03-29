@@ -35,9 +35,9 @@ public class Animation
       return image[current];
    }
 
-   public Image staticImage()
+   public Image staticImage(int count)
    {
-      return image[0];
+      return image[count];
    }
 }
 

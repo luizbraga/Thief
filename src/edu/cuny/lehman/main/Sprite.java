@@ -8,7 +8,7 @@ public abstract class Sprite
 	int x, y, w, h;
 	
 	int dir;
-	
+	Animation[] animation;
 	boolean moving = false;
 	Rect rect;
 	

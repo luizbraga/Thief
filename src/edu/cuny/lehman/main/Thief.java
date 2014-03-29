@@ -2,44 +2,37 @@ package edu.cuny.lehman.main;
 
 import java.awt.Graphics;
 
-public class Thief {
-	int x;
-	int y;
+public class Thief extends Sprite {
 
-  public Thief()
-  {
+	   Animation[] animation;
 
-	  //hahcnged by aqib
-  }
+	   String[] pose = {"up", "dn", "rg", "lt"};
 
 
-  public void openTreasureBox()
-  {
+	   public Thief(int x, int y, String name, int count, int size)
+	   {
+	       super(x, y, 32, 32);
+	       
+	       animation = new Animation[size];
+	       
+	       for(int i = 0; i < animation.length; i++)
+	          animation[i] = new Animation(name+"_"+pose[i], count);
 
-  }
+	   }
 
+	   public void draw(Graphics g)
+	   {
+	      if(moving)
+	      {
+	         g.drawImage(animation[dir].currentImage(),x, y,w,h, null);
+	      }
+	      else
+	      {
+	         g.drawImage(animation[dir].staticImage(0),x, y,w,h, null);
+	      }
+	      
+	      rect.draw(g);
+	      moving = false;
+	   }
 
-   public void moveTreasure()
-   {
-
-   }
-
-
-	public void moveUpBy(int dy) {
-		y -= dy;
-	}
-
-
-	public void moveDownBy(int dy) {
-		y +=dy;
-	}
-
-
-	public void draw(Graphics g) {
-		// TODO Auto-generated method stub
-		
-	}
-
-
-   
 } 

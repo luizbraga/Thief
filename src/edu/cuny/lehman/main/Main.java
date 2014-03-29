@@ -3,6 +3,8 @@ package edu.cuny.lehman.main;
 import java.awt.*;
 import java.awt.event.*;
 import java.applet.*;
+import java.io.IOException;
+import java.util.ArrayList;
 
 public class Main extends Applet implements KeyListener, Runnable
 {
@@ -15,6 +17,7 @@ public class Main extends Applet implements KeyListener, Runnable
 	boolean dnPressed = false;
 	boolean ltPressed = false;
 	boolean rtPressed = false;
+	boolean ePressed  = false;
 
 	final int _UP = KeyEvent.VK_UP;
 	final int _DN = KeyEvent.VK_DOWN;
@@ -47,20 +50,42 @@ public class Main extends Applet implements KeyListener, Runnable
 
 
 	//load the image
-	//ImageLayer background = new ImageLayer("combo.gif");
-	SpriteAnimated thief = new SpriteAnimated(100, 100, "thief", 3, 4);
+	ImageLayer background = new ImageLayer("../images/background_3.jpg", 0, 0, 1000, 700);
+
+
+	Thief thief;
+	Guards guard;
 
 	Image offScreen;
 	Graphics offScreen_g;
 
-	//Thief thief;
+	ArrayList<Treasure> chests = new ArrayList<Treasure>();
+	ArrayList<Rect> walls = new ArrayList<Rect>();
+
+
+	Maps map;
+	int startX, startY, endX, endY;
+	int[][] path;
+	int[] doors = {0, 1, 2};
+
 	//Initialize the applet
 	public void init()
 	{
+		ReloadMap(0);
+
+		// set up the guards
+		path = pathFinder.findPath(startX, startY, endX, endY, map.walkable);
+		guard.endx = endX;
+		guard.endy = endY;
+		guard.walkable = map.walkable;
+		guard.path = path;
+
 		requestFocus();
+
+		setSize(1000, 700);
 		offScreen = createImage(1000, 700);
 		offScreen_g = offScreen.getGraphics();
-		requestFocus ();
+
 		addKeyListener(this);
 
 		thread = new Thread(this);
@@ -72,58 +97,230 @@ public class Main extends Applet implements KeyListener, Runnable
 	public void run()
 	{
 		while (true)
-
 		{
-
-			if(isPressed[KeyEvent.VK_UP])   thief.moveUpBy(4); 
-			if(isPressed[KeyEvent.VK_DOWN]) thief.moveDownBy(4);
-			if(isPressed[KeyEvent.VK_LEFT])  thief.moveLeftBy(4);
-			if(isPressed[KeyEvent.VK_RIGHT]) thief.moveRightBy(4);
-
+			inGameLoop();
 			repaint();
-
 			try
 			{
-
 				Thread.sleep(20);
-			}
-
-			catch(Exception x) {};
-
+			}catch(Exception x) {};
 		}
 
 	}
 
-	public void paint(Graphics g)
-
-	{
+	public void paint(Graphics g) {
 		//		background.draw(g);
+		background.draw(g);
+
 		thief.draw(g);
-		//g.drawRect(100, 100, 50, 50);
-		//g.drawImage(img, 100, 100, null);
+		guard.draw(g);
+		for(Treasure chest: chests){
+			chest.draw(g);
+		}
+		
+		for(Rect wall: walls){
+			wall.draw(g);
+		}
 
 	}
 
-	public void update(Graphics g)
-	{
-
-		offScreen_g.clearRect(0,0,1000,700);  //to clear the screen - no need if the background covers the whole screen.
+	public void update(Graphics g) {
+		//offScreen_g.clearRect(0,0,1000,700);  //to clear the screen - no need if the background covers the whole screen.
 		paint(offScreen_g);
 		g.drawImage(offScreen, 0,0,null);
 	}
 
-
-	public void keyPressed(KeyEvent e)
+	public boolean wallCollisions()
 	{
-		isPressed[e.getKeyCode()] = true;
+		// thief collides with anything on screen
+
+		return (
+				thief.x < 0 || thief.x + thief.w > 1000 ||
+				thief.y < 0 || thief.y + thief.h > 700
+				);
 	}
 
-	public void keyReleased(KeyEvent e)
+
+	public void keyPressed(int code)
 	{
-		isPressed[e.getKeyCode()] = false;
+		if(code == _UP)  upPressed = true;
+		if(code == _DN)  dnPressed = true;
+		if(code == _LT)  ltPressed = true;
+		if(code == _RT)  rtPressed = true;
+		if(code == _E)   ePressed = true;
+
 	}
+
+
+	public void keyReleased(int code)
+	{
+		if(code == _UP)  upPressed = false;
+		if(code == _DN)  dnPressed = false;
+		if(code == _LT)  ltPressed = false;
+		if(code == _RT)  rtPressed = false;
+		if(code == _E)   ePressed = true;
+	}
+
+	public final void keyPressed(KeyEvent e)
+	{
+		keyPressed(e.getKeyCode());
+	}
+
+
+	public final void keyReleased(KeyEvent e)
+	{
+		keyReleased(e.getKeyCode());
+	}
+
 
 	public void keyTyped(KeyEvent e) {  }
+
+	public void inGameLoop(){
+
+		checkUserInput();
+
+		moveOtherObjects();
+
+		checkWhereYouAreOnMap();
+	}
+
+
+	public void ReloadMap(int door)
+	{
+		try
+		{
+			map = new Maps("../maps/map"+door+".txt");
+		}
+		catch (IOException ex) 
+		{ 
+			System.out.println(ex);
+		}
+
+
+		for(int i=0; i<map.width; i++)
+		{
+			for(int j=0; j<map.height; j++)
+			{
+				if(map.map[i][j] == "A" || map.map[i][j] == "B")
+				{
+					Rect wall = new Rect(i*32, j*32, 32, 32);
+					walls.add(wall);
+				}
+				else if(map.map[i][j] == "C")
+				{
+					startX = i;
+					startY = j;
+					guard = new Guards("../images/guard", i*32, j*32, 32, 32, 3, 4);
+				}
+				else if(map.map[i][j] == "D")
+				{
+					endX = i;
+					endY = j;
+				}
+				else if(map.map[i][j] == "T")
+				{
+					thief = new Thief(i*32, j*32,"../images/thief", 3, 4);
+				}
+				else if(map.map[i][j] == "E")
+				{
+					chests.add(new Treasure(i*32, j*32,"../images/chest", 4, 4, 1));
+				}
+			}
+		}
+	}
+
+	public void checkUserInput()
+	{
+		if(upPressed)
+		{
+			if(thief.y%32 != 0)
+			{
+				thief.moveUpBy(4);
+			}
+			else if(map.walkable[thief.x/32][thief.y/32 - 1])
+			{
+				thief.moveUpBy(4);
+			}
+		}
+
+		if(dnPressed)
+		{
+			if(thief.y%32 != 0)
+			{
+				thief.moveDownBy(4);
+			}
+			else if(map.walkable[thief.x/32][thief.y/32 + 1])
+			{
+				thief.moveDownBy(4);
+			}
+		}
+		if(ltPressed)
+		{
+			if(thief.x%32 != 0)
+			{
+				thief.moveLeftBy(4);
+			}
+			else if(map.walkable[thief.x/32 - 1][thief.y/32])
+			{
+				thief.moveLeftBy(4);
+			}
+
+		}
+		if(rtPressed)
+		{
+			if(thief.x%32 != 0)
+			{
+				thief.moveRightBy(4);
+			}
+			else if(map.walkable[thief.x/32 + 1][thief.y/32])
+			{
+				thief.moveRightBy(4);
+			}
+		}
+
+		if(ePressed)
+		{
+			for(int i=0; i<chests.size(); i++){
+				if(!chests.get(i).opened){
+					if(thief.hasCollidedWith(chests.get(i).rect)){
+						chests.get(i).open();
+					}
+				}
+				
+			}
+			ePressed = false;
+			
+		}
+	}
+
+	public void checkWhereYouAreOnMap()
+	{
+		String s = map.map[thief.x/32][thief.y/32];
+		if(s == "0" || s == "1")
+		{
+			map = null;
+			guard = null;
+			walls.clear();
+			chests.clear();
+			ReloadMap(Integer.parseInt(s));
+			// set up the guards
+			path = pathFinder.findPath(startX, startY, endX, endY, map.walkable);
+			guard.endx = endX;
+			guard.endy = endY;
+			guard.walkable = map.walkable;
+			guard.path = path;
+		}
+	}
+	public void moveOtherObjects()
+	{
+		if(!guard.chasing)
+		{
+			guard.patrol = true;
+			guard.patrol(thief.x, thief.y);
+		}
+		else
+			guard.chase(thief.x, thief.y);
+	}
 
 
 }
