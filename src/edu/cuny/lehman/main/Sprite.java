@@ -25,7 +25,7 @@ public abstract class Sprite
 		this.h = h;
 		rect = new Rect(x, y, w, h);
 	}
-
+	
 	public void moveUpBy(int dy)
 	{
 		y -= dy;

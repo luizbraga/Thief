@@ -7,7 +7,7 @@ public class Guards extends Sprite{
 
 	Image image;
 	//Animation[] animation;
-	String[] pose = {"up", "dn", "rg", "lt"};
+	String[] pose = {"up", "dn", "rt", "lt"};
 	boolean patrol = false;
 	boolean chasing = false;
 	
@@ -90,17 +90,29 @@ public class Guards extends Sprite{
   
   public void see(int tx, int ty)
   {
+	  int xt = x - tx;
+	  int yt = y - ty;
+	  int currentX = x/32;
+	  int currentY = y/32;
+	  
 	  if(dir == 0)
 	  {
-		  if((x-tx)*(x-tx) + (y-ty)*(y-ty) < 100*100 && ty < y)
+		  if(xt*xt + yt*yt < 100*100 && ty < y	&&
+			walkable[currentX][currentY -1]		&&
+			walkable[currentX-1][currentY -1]   &&
+			walkable[currentX+1][currentY -1])
 		  {
+			  
 			  chasing = true;
 			  patrol = false;
 		  }
 	  }
 	  if(dir == 1)
 	  {
-		  if((x-tx)*(x-tx) + (y-ty)*(y-ty) < 100*100 && ty > y)
+		  if(xt*xt + yt*yt < 100*100 && ty > y	&&
+			walkable[currentX][currentY +1]		&&
+			walkable[currentX-1][currentY +1]   &&
+			walkable[currentX+1][currentY +1])
 		  {
 			  chasing = true;
 			  patrol = false;
@@ -108,7 +120,10 @@ public class Guards extends Sprite{
 	  }
 	  if(dir == 2)
 	  {
-		  if((x-tx)*(x-tx) + (y-ty)*(y-ty) < 100*100 && tx > x)
+		  if(xt*xt + yt*yt < 100*100 && tx > x  &&
+			walkable[currentX+1][currentY]		&&
+			walkable[currentX+1][currentY-1]    &&
+			walkable[currentX+1][currentY+1])
 		  {
 			  chasing = true;
 			  patrol = false;
@@ -116,7 +131,10 @@ public class Guards extends Sprite{
 	  }
 	  if(dir == 3)
 	  {
-		  if((x-tx)*(x-tx) + (y-ty)*(y-ty) < 100*100 && tx < x)
+		  if(xt*xt + yt*yt < 100*100 && tx < x  &&
+			walkable[currentX-1][currentY]		&&
+			walkable[currentX-1][currentY-1]    &&
+			walkable[currentX-1][currentY+1])
 		  {
 			  chasing = true;
 			  patrol = false;
@@ -144,6 +162,7 @@ public class Guards extends Sprite{
 			   chasing = false;
 			   patrol = true;
 			   path = null;
+			   
 			   path = pathFinder.findPath(x/32, y/32, endx, endy, walkable);
 			   step = -100;
 		   }
@@ -166,17 +185,85 @@ public class Guards extends Sprite{
 	{
 		if(moving)
 		{
-			g.drawImage(animation[dir].currentImage(), x, y,w,h, null);
+			g.drawImage(animation[dir].currentImage(), x+3, y, w-5, h, null);
 		}
 		else
 		{
-			g.drawImage(animation[dir].staticImage(1), x, y,w,h, null);
+			g.drawImage(animation[dir].staticImage(0), x+3, y, w-5, h, null);
 	
 		}
 		
-		rect.draw(g);
+		//rect.draw(g);
 		moving = false;
 	}
-
-	
 } 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+int[] xt = new int[4];
+int[] yt = new int[4];
+if(dir == 0)
+{
+  xt[0] = x - 32;
+  xt[1] = x + w + 32;
+  xt[2] = x + w;
+  xt[3] = x;
+  
+  yt[0] = y - 32;
+  yt[1] = y - 32;
+  yt[2] = y;
+  yt[3] = y;
+  
+		  
+}
+if(dir == 1)
+{
+  xt[0] = x - 32;
+  xt[1] = x + w + 32;
+  xt[2] = x + w;
+  xt[3] = x;
+  
+  yt[0] = y + h +  32;
+  yt[1] = y + h + 32;
+  yt[2] = y + h;
+  yt[3] = y + h;
+}
+if(dir == 2)
+{
+  xt[0] = x + w + 32;
+  xt[1] = x + w + 32;
+  xt[2] = x + w;
+  xt[3] = x + w ;
+  
+  yt[0] = y - 32;
+  yt[1] = y + h + 32;
+  yt[2] = y + h;
+  yt[3] = y;
+}
+if(dir == 3)
+{
+  xt[0] = x - 32;
+  xt[1] = x - 32;
+  xt[2] = x;
+  xt[3] = x ;
+  
+  yt[0] = y - 32;
+  yt[1] = y + h + 32;
+  yt[2] = y + h;
+  yt[3] = y;
+}
+
+g.drawPolygon(xt, yt, 4);
+*/

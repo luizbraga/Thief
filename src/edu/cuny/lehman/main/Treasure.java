@@ -3,16 +3,20 @@ package edu.cuny.lehman.main;
 import java.awt.Graphics;
 
 public class Treasure extends Sprite{
-	
+
 	Animation[] animation;
 	String[] pose = {"up", "dn", "rg", "lt"};
 
 	boolean opened = false;
+	final int id;
+	
+	
 	int count = 0;
 
-	public Treasure(int x, int y, String name, int count, int size, int dir) {
+	public Treasure(int id, int x, int y, String name, int count, int size, int dir) {
 		super(x, y, 32, 32);
 		this.dir = dir;
+		this.id = id;
 		
 		animation = new Animation[size];
 		for(int i = 0; i < animation.length; i++)
@@ -24,6 +28,11 @@ public class Treasure extends Sprite{
 		if(opened == false){
 			opened = true;
 		}
+	}
+	
+	public void set(int x, int y){
+		this.x = x;
+		this.y = y;
 	}
 
 	@Override
@@ -41,10 +50,9 @@ public class Treasure extends Sprite{
 			g.drawImage(animation[dir].staticImage(0),x, y, null);
 		}
 		
-		rect.draw(g);
+		//rect.draw(g);
 	}
 	
 	
-
 
 }

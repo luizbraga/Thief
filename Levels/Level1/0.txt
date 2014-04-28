@@ -1,19 +1,19 @@
 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
 A     B             B         A
-A   D B                       A
-A                             A
+A     B                       A
+A                       Z     A
 A                   B         A
 A     B             B         A
-A  E  B             B         A
+A  D EB             B         A
 AAAAAAAAAAAAA  AAAAAAAAAAAAAAAA
-A  E        B                 A
-A           B           C     A
+A           B                 A
+A           B                 A
 A           B          BBBBBBBA
 A                             A
 A                             A
 AAAAAAAAAA  AAAAAAAAAAAAAAAAAAA
 A                             A
-A                            T1
+A   T                         1
 A                B            1
 A                B   BBBBBBBBBA
 A                B            A

@@ -12,11 +12,21 @@ public class Maps
 	ArrayList lines = new ArrayList();
 	int width = 0;
 	int height = 0;
+	int numberOfGuards = 0;
+	int room = 0;
+	String currentLevel;
 	
-	public Maps(String filename) throws IOException
+	public Maps(String currentLevel, int room) throws IOException
+	{
+		this.currentLevel = currentLevel;
+		this.room = room; 
+		String filename = "../Levels/" + currentLevel + "/" + room + ".txt"; 
+		loadFile(filename);
+		
+	}
+	public void loadFile(String filename) throws IOException
 	{
 		BufferedReader reader = new BufferedReader(new FileReader(filename));
-
 		while(true)
 		{
 			String line = reader.readLine();
@@ -46,47 +56,48 @@ public class Maps
 				char ch = line.charAt(x);
 				if(ch == 'A')
 				{
-					map[x][y] = "A";
+					map[x][y] = "Wall";
 					walkable[x][y] = false;
 				}
-				if(ch == 'B')
+				else if(ch == 'B')
 				{
-					map[x][y] = "B";
+					map[x][y] = "Wall";
 					walkable[x][y] = false;
 				}
-				if(ch == 'C')
+				else if(ch == 'Z')
 				{
-					map[x][y] = "C";
+					map[x][y] = "Z";
 					walkable[x][y] = true;
+					numberOfGuards++;
 				}
-				if(ch == 'D')
-				{
-					map[x][y] = "D";
-					walkable[x][y] = true;
-				}
-				if(ch == 'T')
+				else if(ch == 'T')
 				{
 					map[x][y] = "T";
 					walkable[x][y] = true;
 				}
-				if(ch == '0')
+				else if(ch == '0')
 				{
 					map[x][y] = "0";
 					walkable[x][y] = true;
 				}
-				if(ch == '1')
+				else if(ch == '1')
 				{
 					map[x][y] = "1";
 					walkable[x][y] = true;
 				}
-				if(ch == ' ')
+				else if(ch == '2')
 				{
+					map[x][y] = "2";
 					walkable[x][y] = true;
 				}
-				if(ch == 'E')
+				else if(ch == 'E')
 				{
 					map[x][y] = "E";
 					walkable[x][y] = false;
+				}
+				else
+				{
+					walkable[x][y] = true;
 				}
 			}
 		}
