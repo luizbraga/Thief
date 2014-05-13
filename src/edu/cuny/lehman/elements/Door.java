@@ -1,4 +1,4 @@
-package edu.cuny.lehman.main;
+package edu.cuny.lehman.elements;
 
 public class Door {
 

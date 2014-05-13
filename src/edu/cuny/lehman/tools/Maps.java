@@ -1,4 +1,4 @@
-package edu.cuny.lehman.main;
+package edu.cuny.lehman.tools;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -7,12 +7,12 @@ import java.util.ArrayList;
 
 public class Maps 
 {
-	String[][] map;
-	boolean[][] walkable;
+	public String[][] map;
+	public boolean[][] walkable;
 	ArrayList lines = new ArrayList();
-	int width = 0;
-	int height = 0;
-	int numberOfGuards = 0;
+	public int width = 0;
+	public int height = 0;
+	public int numberOfGuards = 0;
 	int room = 0;
 	String currentLevel;
 	
@@ -89,6 +89,16 @@ public class Maps
 				{
 					map[x][y] = "2";
 					walkable[x][y] = true;
+				}
+				else if(ch == 'Q')
+				{
+					map[x][y] = "Q";
+					walkable[x][y] = false;
+				}
+				else if(ch == 'R')
+				{
+					map[x][y] = "R";
+					walkable[x][y] = false;
 				}
 				else if(ch == 'E')
 				{

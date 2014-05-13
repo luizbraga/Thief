@@ -1,21 +1,24 @@
-package edu.cuny.lehman.main;
+package edu.cuny.lehman.tools;
 
 import java.awt.*;
 
 
 public abstract class Sprite 
 {
-	int x, y, w, h;
+	public int x;
+	public int y;
+	protected int w;
+	protected int h;
 	
-	int dir;
-	Animation[] animation;
-	boolean moving = false;
-	Rect rect;
+	public int dir;
+	protected Animation[] animation;
+	protected boolean moving = false;
+	public Rect rect;
 	
-	final static int UP = 0;
-	final static int DN = 1;
-	final static int RT = 2;
-	final static int LT = 3;
+	private final static int UP = 0;
+	private final static int DN = 1;
+	private final static int RT = 2;
+	private final static int LT = 3;
 	
 	public Sprite(int x, int y, int w, int h)
 	{
@@ -55,6 +58,13 @@ public abstract class Sprite
 		moving = true;
 	}
 	
+	public void moveTo(int nx, int ny)
+	{
+		x += nx;
+		rect.x = x;
+		y += ny;
+		rect.x = y;
+	}
 	
 	public boolean hasCollidedWith(Rect r)
 	{

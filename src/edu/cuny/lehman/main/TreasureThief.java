@@ -6,50 +6,42 @@ import java.applet.*;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
+import edu.cuny.lehman.elements.Guards;
+import edu.cuny.lehman.elements.Thief;
+import edu.cuny.lehman.elements.Treasure;
+import edu.cuny.lehman.elements.Walls;
+import edu.cuny.lehman.tools.ImageLayer;
+import edu.cuny.lehman.tools.Maps;
+import edu.cuny.lehman.tools.Rect;
+import edu.cuny.lehman.tools.pathFinder;
+
+
 public class TreasureThief extends Applet implements KeyListener, Runnable
 {
-	//boolean[] pressed = new boolean[256];
+	
 	Thread thread;
+	boolean firstTime = true;
 
 	boolean upPressed = false;
 	boolean dnPressed = false;
 	boolean ltPressed = false;
 	boolean rtPressed = false;
-	boolean ePressed  = false;
-	boolean pPressed  = false;
+	boolean rGPressed = false;
 
 	final int _UP = KeyEvent.VK_UP;
 	final int _DN = KeyEvent.VK_DOWN;
 	final int _LT = KeyEvent.VK_LEFT;
 	final int _RT = KeyEvent.VK_RIGHT;
-	final int _A = KeyEvent.VK_A;
-	final int _B = KeyEvent.VK_B;
-	final int _C = KeyEvent.VK_C;
-	final int _D = KeyEvent.VK_D;
+	
 	final int _E = KeyEvent.VK_E;
-	final int _F = KeyEvent.VK_F;
 	final int _G = KeyEvent.VK_G;
-	final int _H = KeyEvent.VK_H;
-	final int _I = KeyEvent.VK_I;
-	final int _J = KeyEvent.VK_J;
-	final int _K = KeyEvent.VK_K;
-	final int _L = KeyEvent.VK_L;
-	final int _P = KeyEvent.VK_P;
-	final int _0 = KeyEvent.VK_0;
-	final int _1 = KeyEvent.VK_1;
-	final int _2 = KeyEvent.VK_2;
-	final int _3 = KeyEvent.VK_3;
-	final int _4 = KeyEvent.VK_4;
-	final int _5 = KeyEvent.VK_5;
-	final int _6 = KeyEvent.VK_6;
-	final int _7 = KeyEvent.VK_7;
 
-	private boolean isOver = false;
-	private boolean isPaused = false;
 
 	Image offScreen;
 	Graphics offScreen_g;
@@ -58,18 +50,20 @@ public class TreasureThief extends Applet implements KeyListener, Runnable
 	ImageLayer background = new ImageLayer("../images/background_3.jpg", 0, 0, 1000, 700);
 
 	// creating characters.. 
-	Thief thief;// = new Thief("thief", 64, 480, 32, 32, 3, 4);
-	Guards[] guard;
-	ArrayList<Treasure> chests = new ArrayList<Treasure>();
+	Thief thief;
+	int first_X_Thief;
+	int first_Y_Thief;
 
-	ArrayList<Walls> walls = new ArrayList<Walls>();
+	Guards[] guards;
+	ArrayList<Treasure> chests = new ArrayList<Treasure>();
+	ArrayList<Walls> walls;
 
 
 	Maps map;
 	int[] guardStartX, guardStartY;
-	int numberOfGuards = 0;
+	int numberOfGuards;
 
-	int door = 0;
+	int door;
 	int doorEnteredX;
 	int doorEnteredY;
 	String level;
@@ -77,21 +71,49 @@ public class TreasureThief extends Applet implements KeyListener, Runnable
 	//create Menu to select Level
 	JOptionPane jp = new JOptionPane();
 	JPanel panel = new JPanel();   
-	JComboBox cbox = new JComboBox();
 
-	//Initialize the applet
+	// pause menu
+	JOptionPane jp1 = new JOptionPane();
+
+	// Sound variable set up
+	AudioClip clip;
+
+
+	//exit door
+	Rect exit = new Rect(320000, 320000, 32, 32);
+	Rect activator = new Rect(32000, 320000, 32, 32);
+	boolean doorIsOpen = false;
+
+	//others
+	boolean gameover;
+	private boolean ePressed;
+
 	public void init()
 	{
-		preGameSetUp();
+		initStart();
+	}
 
+	//Initialize the applet
+	public void initStart()
+	{	
+		preGameSetUp();
+		gameover = false;
+		numberOfGuards = 0;
+		door = 0;
+		boolean firstTimeStatingThief = true;
+		resetKeys();
+		
+		//thief setup
 		thief = new Thief("thief", 0, 0, 32, 32, 3, 4);
 		ReloadMap("0");
 
-		//initial thief location
-		doorEnteredX = 3;
-		doorEnteredY = 10;
-		thief = null;
-		thief = new Thief("thief", doorEnteredX*32, (doorEnteredY+1)*32, 32, 32, 3, 4);
+
+		if(firstTimeStatingThief){
+			//initial thief location
+			thief = null;
+			thief = new Thief("thief", first_X_Thief*32, (first_Y_Thief)*32, 32, 32, 3, 4);
+			firstTimeStatingThief = false;
+		}
 
 		setUpGuards();
 
@@ -104,36 +126,56 @@ public class TreasureThief extends Applet implements KeyListener, Runnable
 		requestFocus ();
 		addKeyListener(this);
 
-		thread= new Thread(this);
-		thread.start();
+		if(firstTime)
+		{
+			thread = new Thread(this);
+			thread.start();
+			firstTime = false;
+		}
+		//setup Sound files
+		clip = getAudioClip(getCodeBase(), "../Sound/music.midi");
+		clip.loop();
 
+		// to stop clip use -- clip.stop()
+
+
+
+	}
+
+	private void resetKeys() {
+		upPressed = false;
+		dnPressed = false;
+		rtPressed = false;
+		ltPressed = false;
 	}
 
 	//Component initialization
 	public void run()
 	{
-		while (!isOver)
+
+		while (true)
+
 		{
-			checkUserInput();
-			
-			inGameLoop();
-			
-			repaint();
-			try
+			if(!gameover)
 			{
-				Thread.sleep(15);
-			}catch(Exception x) {};
+				checkUserInput();
 
-			
+				moveOtherObjects();
+
+				checkWhereYouAreOnMap();
+
+				repaint();
+				try
+				{
+					Thread.sleep(15);
+				}
+
+				catch(Exception x) {};
+			}
+			else
+				pauseMenu("Main Menu");
 		}
 
-	}
-
-	private void inGameLoop() {
-		if(!isPaused){
-			moveOtherObjects();
-			checkWhereYouAreOnMap();
-		}
 	}
 
 	public void paint(Graphics g)
@@ -142,22 +184,19 @@ public class TreasureThief extends Applet implements KeyListener, Runnable
 		background.draw(g);
 		thief.draw(g);
 
-
 		for(Treasure chest: chests)
 			chest.draw(g);
 
-		for(int i=0; i<guard.length; i++)
-			guard[i].draw(g);
+		for(Guards guard: guards)
+			guard.draw(g);
 
 		for(Walls wall: walls)
 			wall.draw(g);
 
-		if(isOver){
-			g.drawString("GAME OVER!", 420, 75);
-		}
-		if(isPaused){
-			g.drawString("Paused!", 420, 75);
-		}
+		g.setColor(Color.GREEN);
+		exit.draw(g);
+		activator.draw(g);
+		g.setColor(Color.black);
 	}
 
 	public void update(Graphics g)
@@ -176,7 +215,7 @@ public class TreasureThief extends Applet implements KeyListener, Runnable
 		if(code == _LT)  ltPressed = true;
 		if(code == _RT)  rtPressed = true;
 		if(code == _E)   ePressed  = true;
-		if(code == _P)   pPressed  = true;
+
 	}
 
 
@@ -186,8 +225,8 @@ public class TreasureThief extends Applet implements KeyListener, Runnable
 		if(code == _DN)  dnPressed = false;
 		if(code == _LT)  ltPressed = false;
 		if(code == _RT)  rtPressed = false;
+		if(code == _G)   rGPressed = true;
 		if(code == _E)   ePressed  = true;
-		if(code == _P)   pPressed  = false;
 	}
 
 
@@ -206,7 +245,10 @@ public class TreasureThief extends Applet implements KeyListener, Runnable
 
 	public void ReloadMap(String door)
 	{
-		chests.clear();
+		int exitIsHere = 0;
+		int activatorIsHere = 0;
+		walls = new ArrayList<Walls>();
+
 		int lastDoor = Integer.parseInt(door);
 		try
 		{
@@ -226,7 +268,6 @@ public class TreasureThief extends Applet implements KeyListener, Runnable
 			{
 				if(map.map[i][j] == "Wall")
 				{
-
 					walls.add(new Walls("../images/wall.png", i*32, j*32, 32, 32));
 				}
 				else if(map.map[i][j] == "Z")
@@ -251,6 +292,21 @@ public class TreasureThief extends Applet implements KeyListener, Runnable
 					doorEnteredX = i;
 					doorEnteredY = j;
 				}
+				else if(map.map[i][j] == "T")
+				{
+					first_X_Thief = i;
+					first_Y_Thief = j;
+				}
+				else if(map.map[i][j] == "Q" && doorIsOpen == false)
+				{
+					exit.set(i*32, j*32);
+					exitIsHere = 1;
+				}
+				else if(map.map[i][j] == "R")
+				{
+					activator.set(i*32, j*32);
+					activatorIsHere = 1;
+				}
 				else if(map.map[i][j] == "E")
 				{
 
@@ -272,11 +328,21 @@ public class TreasureThief extends Applet implements KeyListener, Runnable
 			}
 		}
 
-		if(doorEnteredX*32 >= 1000)
+		if(exitIsHere == 0)
+		{
+			exit.set(32000, 32000);
+		}
+
+		if(activatorIsHere == 0)
+		{
+			activator.set(32000, 32000);
+		}
+
+		if(doorEnteredX*32 >= 992)
 			thief.set((doorEnteredX-1)*32, doorEnteredY*32);
 		else if(doorEnteredX*32 <= 0)
 			thief.set((doorEnteredX+1)*32, doorEnteredY*32);
-		else if(doorEnteredY*32 >= 700)
+		else if(doorEnteredY*32 >= 670)
 			thief.set(doorEnteredX*32, (doorEnteredY-1)*32);
 		else if(doorEnteredY*32 <= 0)
 			thief.set(doorEnteredX*32, (doorEnteredY+1)*32);
@@ -286,80 +352,56 @@ public class TreasureThief extends Applet implements KeyListener, Runnable
 
 	public void checkUserInput()
 	{
-		
-		if(!isPaused){
-			if(upPressed)
-			{
-				thief.moveUpBy(4);
-			}
-	
-			else if(dnPressed)
-			{
-				thief.moveDownBy(4);
-			}
-			else if(ltPressed)
-			{
-				thief.moveLeftBy(4);
-			}
-			else if(rtPressed)
-			{
-				thief.moveRightBy(4);
-			}
-			else if(ePressed)
-			{
-				for(int i=0; i<chests.size(); i++){
-					if(!chests.get(i).opened){
-						if(thief.hasCollidedWith(chests.get(i).rect)){
-							chests.get(i).open();
-							thief.items.add(chests.get(i));
-						}
+		if(upPressed)
+		{
+			thief.moveUpBy(4);
+		}
+		else if(dnPressed)
+		{
+			thief.moveDownBy(4);
+		}
+		else if(ltPressed)
+		{
+			thief.moveLeftBy(4);
+		}
+		else if(rtPressed)
+		{
+			thief.moveRightBy(4);
+		}
+		else if(ePressed)
+		{
+			for(int i=0; i<chests.size(); i++){
+				if(!chests.get(i).opened){
+					if(thief.hasCollidedWith(chests.get(i).rect)){
+						chests.get(i).open();
+						Treasure collected = chests.get(i);
+						thief.items.add(new Treasure(collected.id, collected.x, 
+								collected.y, "chest", 4, 4, 1, true));
+
 					}
-	
 				}
-				ePressed = false;
+
 			}
+			ePressed = false;
 		}
-		
-		if(pPressed){
-			if(isPaused){
-				isPaused = false;
-			}else{
-				isPaused = true;
-			}
+
+		// to pause the game
+		if(rGPressed == true)
+		{
+			pauseMenu("Pause");
 		}
-		
-		//checkCollisionWithChests();
+
+
+		/*
+	   // testing the exit door
+	   if(thief.rect.hasCollidedWith(activator) && rGPressed == true)
+	   {
+		   exit.set(32000, 32000);
+		   doorIsOpen = true;
+	   }
+		 */
 		checkCollisionWithWalls();
 		checkCollisionWithGuards();
-	}
-
-	private void checkCollisionWithChests() {
-		for(Treasure chest: chests)
-		{
-			if(chest.rect.hasCollidedWith(thief.rect))
-			{
-				if(thief.dir == 0)
-				{
-					thief.y += 4;
-					thief.rect.y += 4;
-				}
-				else if(thief.dir == 1)
-				{
-					thief.y -= 4;
-					thief.rect.y -= 4;
-				}
-				else if(thief.dir == 2)
-				{
-					thief.x -= 4;
-					thief.rect.x -= 4;
-				}
-				else if(thief.dir == 3)
-				{
-					thief.x += 4;
-					thief.rect.x += 4;
-				}
-			}
-		}
 	}
 
 	public void checkWhereYouAreOnMap()
@@ -369,8 +411,9 @@ public class TreasureThief extends Applet implements KeyListener, Runnable
 		if(s == "0" || s == "1" || s == "2")
 		{
 			map = null;
-			guard = null;
+			guards = null;
 			walls.clear();
+			chests.clear();
 			numberOfGuards = 0;
 
 			ReloadMap(s);
@@ -384,35 +427,35 @@ public class TreasureThief extends Applet implements KeyListener, Runnable
 	}
 	public void moveOtherObjects()
 	{
-		for(int i=0; i<guard.length; i++)
+		for(int i=0; i<guards.length; i++)
 		{
-			if(!guard[i].chasing)
+			if(!guards[i].chasing)
 			{
-				guard[i].patrol = true;
-				guard[i].patrol(thief.x, thief.y);
+				guards[i].patrol = true;
+				guards[i].patrol(thief.x, thief.y);
 			}
 			else
-				guard[i].chase(thief.x, thief.y);
+				guards[i].chase(thief.x, thief.y);
 		}
 	}
 
 	public void setUpGuards()
 	{
-		guard = new Guards[map.numberOfGuards];
+		guards = new Guards[map.numberOfGuards];
 
-		for(int i=0; i<guard.length; i++)
+		for(int i=0; i<guards.length; i++)
 		{
-			guard[i] = new Guards("guard", guardStartX[i], guardStartY[i], 32, 32, 3, 4);
+			guards[i] = new Guards("guard", guardStartX[i], guardStartY[i], 32, 32, 3, 4);
 
-			guard[i].path = pathFinder.findPath(guardStartX[i]/32, 
+			guards[i].path = pathFinder.findPath(guardStartX[i]/32, 
 					guardStartY[i]/32,
-					guardStartX[(i+1)%guard.length]/32, 
-					guardStartY[(i+1)%guard.length]/32, 
+					guardStartX[(i+1)%guards.length]/32, 
+					guardStartY[(i+1)%guards.length]/32, 
 					map.walkable);
 
-			guard[i].endx = guardStartX[(i+1)%guard.length]/32;
-			guard[i].endy = guardStartY[(i+1)%guard.length]/32;
-			guard[i].walkable = map.walkable;
+			guards[i].endx = guardStartX[(i+1)%guards.length]/32;
+			guards[i].endy = guardStartY[(i+1)%guards.length]/32;
+			guards[i].walkable = map.walkable;
 		}
 	}
 
@@ -448,26 +491,70 @@ public class TreasureThief extends Applet implements KeyListener, Runnable
 
 	public void checkCollisionWithGuards()
 	{
-		for(int i=0; i<guard.length; i++)
+		for(int i=0; i<guards.length; i++)
 		{
-			if(guard[i].rect.hasCollidedWith(thief.rect))
+			if(guards[i].rect.hasCollidedWith(thief.rect))
 			{
-				isOver = true;
+				//GameOver
+				gameover = true;
 			}
 		}
 	}
 
 	public void preGameSetUp()
 	{
+		JComboBox cbox = new JComboBox();
 		cbox.addItem("1");
 		cbox.addItem("2");
 		cbox.addItem("3");
 
 		jp.showOptionDialog(null, cbox,"Select Level",
-				JOptionPane.OK_CANCEL_OPTION,  
+				JOptionPane.CLOSED_OPTION,  
 				JOptionPane.QUESTION_MESSAGE, null, null, null);
 
+
 		level = "Level" + cbox.getSelectedItem();
+		gameover = false;
+	}
+
+	public void pauseMenu(String title)
+	{
+		Object[] options1 = {"Play Again", "Show Score", "Exit"};
+
+		int m  = jp1.showOptionDialog(null,
+				title,
+				"Menu",
+				JOptionPane.YES_NO_CANCEL_OPTION,
+				JOptionPane.PLAIN_MESSAGE,
+				null,
+				options1,
+				null);
+
+		rGPressed = false;
+
+		if(m == 0)
+		{
+			makeAllNull();
+			initStart();
+
+		}
+
+		if(m == 2)
+		{
+			System.exit(0);
+		}
+
+		// m is 0, 1 or 2
+		// use m to decide what to do next
+
+	}
+
+	public void makeAllNull()
+	{
+		guards = null;
+		map = null;
+		guardStartX = null;
+		guardStartY = null;
 	}
 }
 

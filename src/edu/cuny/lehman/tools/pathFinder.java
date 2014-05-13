@@ -1,4 +1,4 @@
-package edu.cuny.lehman.main;
+package edu.cuny.lehman.tools;
 
 public class pathFinder 
 {

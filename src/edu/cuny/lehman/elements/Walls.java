@@ -1,12 +1,14 @@
-package edu.cuny.lehman.main;
+package edu.cuny.lehman.elements;
 
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Toolkit;
 
+import edu.cuny.lehman.tools.Sprite;
+
 public class Walls extends Sprite
 {
-
+	
 	Image image;
 	
 	public Walls(String name, int x, int y, int w, int h)
@@ -19,8 +21,7 @@ public class Walls extends Sprite
 
 	public void draw(Graphics g) 
 	{
-		//g.drawImage(image, x, y, w, h, null);
-		g.drawImage(image, super.x, super.y, null);
+		g.drawImage(image, x, y, null);
 		rect.draw(g);
 	}
 }

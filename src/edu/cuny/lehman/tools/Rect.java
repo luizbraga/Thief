@@ -1,10 +1,13 @@
-package edu.cuny.lehman.main;
+package edu.cuny.lehman.tools;
 import java.awt.Graphics;
 
 
 public class Rect 
 {
-int x, y, w, h;
+	public int x;
+	public int y;
+	protected int w;
+	protected int h;
 	
 	
 	public Rect(int x, int y, int w, int h)
@@ -14,7 +17,11 @@ int x, y, w, h;
 		this.w = w;
 		this.h = h;
 	}
-	
+	public void set(int dx, int dy)
+	{
+		x = dx;
+		y = dy;
+	}
 	public void moveBy(int dx, int dy)
 	{
 		x += dx;
@@ -40,10 +47,10 @@ int x, y, w, h;
 	
 	public boolean hasCollidedWith(Rect r)
 	{
-		return ((  x +   w >= r.x)  	&& 
-				(r.x + r.w >=   x) 		&&
-				(  y +   h >= r.y) 		&& 
-				(r.y + r.h >=   y));
+		return ((  x +   w > r.x)  	&& 
+				(r.x + r.w >   x) 		&&
+				(  y +   h > r.y) 		&& 
+				(r.y + r.h >   y));
 	}
 	public boolean contains(int mx, int my)
 	{
@@ -52,6 +59,6 @@ int x, y, w, h;
 	
 	public void draw(Graphics g)
 	{
-		g.drawRect(x + Origin.x, y + Origin.y, w, h);
+		g.drawRect(x, y, w, h);
 	}
 }

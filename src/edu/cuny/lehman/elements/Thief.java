@@ -1,8 +1,11 @@
-package edu.cuny.lehman.main;
+package edu.cuny.lehman.elements;
 
 import java.awt.Graphics;
 import java.awt.Image;
 import java.util.ArrayList;
+
+import edu.cuny.lehman.tools.Animation;
+import edu.cuny.lehman.tools.Sprite;
 
 public class Thief extends Sprite{
 	
@@ -10,7 +13,7 @@ public class Thief extends Sprite{
 	Animation[] animation;
 	String[] pose = {"up", "dn", "rt", "lt"};
 	
-	ArrayList<Treasure> items = new ArrayList<Treasure>();
+	public ArrayList<Treasure> items = new ArrayList<Treasure>();
 	
 	public Thief(String name, int x, int y, int w, int h, int count, int size)
 	{

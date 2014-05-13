@@ -1,23 +1,27 @@
-package edu.cuny.lehman.main;
+package edu.cuny.lehman.elements;
 
 import java.awt.Graphics;
 import java.awt.Image;
+
+import edu.cuny.lehman.tools.Animation;
+import edu.cuny.lehman.tools.Sprite;
+import edu.cuny.lehman.tools.pathFinder;
 
 public class Guards extends Sprite{
 
 	Image image;
 	//Animation[] animation;
 	String[] pose = {"up", "dn", "rt", "lt"};
-	boolean patrol = false;
-	boolean chasing = false;
+	public boolean patrol = false;
+	public boolean chasing = false;
 	
-	int[][] path;
-	boolean[][] walkable;
-	int step = 0;
-	int startx;
-	int starty;
-	int endx;
-	int endy;
+	public int[][] path;
+	public boolean[][] walkable;
+	private int step = 0;
+	private int startx;
+	private int starty;
+	public int endx;
+	public int endy;
 	
 	
 	public Guards(String name, int x, int y, int w, int h, int count, int size)
@@ -197,73 +201,3 @@ public class Guards extends Sprite{
 		moving = false;
 	}
 } 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*
-int[] xt = new int[4];
-int[] yt = new int[4];
-if(dir == 0)
-{
-  xt[0] = x - 32;
-  xt[1] = x + w + 32;
-  xt[2] = x + w;
-  xt[3] = x;
-  
-  yt[0] = y - 32;
-  yt[1] = y - 32;
-  yt[2] = y;
-  yt[3] = y;
-  
-		  
-}
-if(dir == 1)
-{
-  xt[0] = x - 32;
-  xt[1] = x + w + 32;
-  xt[2] = x + w;
-  xt[3] = x;
-  
-  yt[0] = y + h +  32;
-  yt[1] = y + h + 32;
-  yt[2] = y + h;
-  yt[3] = y + h;
-}
-if(dir == 2)
-{
-  xt[0] = x + w + 32;
-  xt[1] = x + w + 32;
-  xt[2] = x + w;
-  xt[3] = x + w ;
-  
-  yt[0] = y - 32;
-  yt[1] = y + h + 32;
-  yt[2] = y + h;
-  yt[3] = y;
-}
-if(dir == 3)
-{
-  xt[0] = x - 32;
-  xt[1] = x - 32;
-  xt[2] = x;
-  xt[3] = x ;
-  
-  yt[0] = y - 32;
-  yt[1] = y + h + 32;
-  yt[2] = y + h;
-  yt[3] = y;
-}
-
-g.drawPolygon(xt, yt, 4);
-*/

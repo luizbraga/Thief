@@ -1,4 +1,4 @@
-package edu.cuny.lehman.main;
+package edu.cuny.lehman.tools;
 import java.awt.*;
 
 
@@ -35,8 +35,8 @@ public class Animation
 		return image[current];
 	}
 	
-	public Image staticImage(int count)
+	public Image staticImage(int i)
 	{
-		return image[count];
+		return image[i];
 	}
 }

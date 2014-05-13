@@ -1,21 +1,21 @@
 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-A     B             B         A
-A     B                       A
-A                       Z     A
+A   E       A       B    E    A
+A           A                 A
+A                             A
 A                   B         A
-A     B             B         A
-A  D EB             B         A
-AAAAAAAAAAAAA  AAAAAAAAAAAAAAAA
+A           A       B         A
+A  Z        A       B      Z  A
+AAAAAAAAAAAAA       AAAAAAAAAAA
+A                   B         A
+A                   B         A
+A           B       B         A
 A           B                 A
 A           B                 A
-A           B          BBBBBBBA
+AAAAAAAAAAAAA       AAAAAAAAAAA
+A                             A
+A     T                       A
+Q                             A
 A                             A
 A                             A
-AAAAAAAAAA  AAAAAAAAAAAAAAAAAAA
 A                             A
-A   T                         1
-A                B            1
-A                B   BBBBBBBBBA
-A                B            A
-A                B            A
-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAA11AAAAAAAAAAAA
