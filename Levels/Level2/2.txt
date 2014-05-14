@@ -1,0 +1,22 @@
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+A    AA            A  E  A    A
+A  Z AA   E   AAA  A     A   AA
+AE   AA        E            EAA
+A    AAAAAAA    Z  AAA        A         
+A                  AAA  ZA    A
+AAA  Z                   A    A
+AAAAAAAAAAAAA   AAAAAAAAAAAAAAA
+A          E       A  Z       A
+A             A E  A     A E  A
+AE z AAAAA    A          A    A
+A        A   AAAAA   AA  AAAAAA
+A                   Z A       A
+A      E              A      EA
+AAA   AAAA  AAAAAAAAAAA  AAAAAA
+A      E A      E     A       A
+A   Z    A            A    Z  A
+A   A   AAA   AA     AA   A   A
+A   A         AA          A   A
+AT  A                     A   Q
+A   AAAAAAAAA  Z  AAAAAAAAA   Q
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
