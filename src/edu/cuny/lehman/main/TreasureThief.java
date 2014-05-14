@@ -12,6 +12,8 @@ import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
+import edu.cuny.lehman.elements.Door;
+import edu.cuny.lehman.elements.DoorActivator;
 import edu.cuny.lehman.elements.Guards;
 import edu.cuny.lehman.elements.Thief;
 import edu.cuny.lehman.elements.Treasure;
@@ -27,6 +29,7 @@ public class TreasureThief extends Applet implements KeyListener, Runnable
 	
 	Thread thread;
 	boolean firstTime = true;
+	boolean nextLevel = false;
 
 	boolean upPressed = false;
 	boolean dnPressed = false;
@@ -62,10 +65,11 @@ public class TreasureThief extends Applet implements KeyListener, Runnable
 	Maps map;
 	int[] guardStartX, guardStartY;
 	int numberOfGuards;
-
+	int score;
 	int door;
 	int doorEnteredX;
 	int doorEnteredY;
+	int CurrentLevel;
 	String level;
 
 	//create Menu to select Level
@@ -80,8 +84,8 @@ public class TreasureThief extends Applet implements KeyListener, Runnable
 
 
 	//exit door
-	Rect exit = new Rect(320000, 320000, 32, 32);
-	Rect activator = new Rect(32000, 320000, 32, 32);
+	Door[] exit = new Door[2];
+	DoorActivator activator = new DoorActivator(32000, 32000, 32, 32, exit);
 	boolean doorIsOpen = false;
 
 	//others
@@ -96,7 +100,11 @@ public class TreasureThief extends Applet implements KeyListener, Runnable
 	//Initialize the applet
 	public void initStart()
 	{	
-		preGameSetUp();
+		if(!nextLevel)
+		{
+			preGameSetUp();
+		}
+
 		gameover = false;
 		numberOfGuards = 0;
 		door = 0;
@@ -119,8 +127,8 @@ public class TreasureThief extends Applet implements KeyListener, Runnable
 
 		requestFocus();
 		// size of the screen
-		setSize(1000, 700);
-		offScreen = createImage(1000, 700);
+		setSize(1200, 700);
+		offScreen = createImage(1200, 700);
 		offScreen_g = offScreen.getGraphics();
 
 		requestFocus ();
@@ -163,6 +171,8 @@ public class TreasureThief extends Applet implements KeyListener, Runnable
 				moveOtherObjects();
 
 				checkWhereYouAreOnMap();
+				
+				checkIfLevelComplete();
 
 				repaint();
 				try
@@ -181,6 +191,10 @@ public class TreasureThief extends Applet implements KeyListener, Runnable
 	public void paint(Graphics g)
 
 	{
+		Font normal = g.getFont();
+		g.setFont(normal);
+		
+		g.setColor(Color.black);
 		background.draw(g);
 		thief.draw(g);
 
@@ -192,11 +206,36 @@ public class TreasureThief extends Applet implements KeyListener, Runnable
 
 		for(Walls wall: walls)
 			wall.draw(g);
-
+		/*
 		g.setColor(Color.GREEN);
 		exit.draw(g);
-		activator.draw(g);
+		
 		g.setColor(Color.black);
+		*/
+		for(Door doorExit : exit)
+			doorExit.draw(g);
+		
+		activator.draw(g);
+		// display score 
+		Font big = new Font("SanSerif", Font.BOLD, 20);
+		g.setFont(big);
+		g.fillRect(1000, 0, 200, 700);
+		g.setColor(Color.white);
+		g.drawString("Score: " + score, 1010, 100);
+		g.drawString("Level: " + CurrentLevel, 1010, 150);
+		// instructions to play
+		g.drawString("To move use ", 1010, 200);
+		g.drawString("up, dn, lt, rt", 1010, 220);
+		
+		g.drawString("To Pause press G", 1010, 300);
+		
+		g.drawString("To Open Door", 1010, 400);
+		g.drawString("press R", 1010, 420);
+		
+		g.drawString("To open chest", 1010, 450);
+		g.drawString("press E", 1010, 470);
+		
+		
 	}
 
 	public void update(Graphics g)
@@ -248,6 +287,7 @@ public class TreasureThief extends Applet implements KeyListener, Runnable
 		int exitIsHere = 0;
 		int activatorIsHere = 0;
 		walls = new ArrayList<Walls>();
+		int countExit = 0;
 
 		int lastDoor = Integer.parseInt(door);
 		try
@@ -299,11 +339,13 @@ public class TreasureThief extends Applet implements KeyListener, Runnable
 				}
 				else if(map.map[i][j] == "Q" && doorIsOpen == false)
 				{
-					exit.set(i*32, j*32);
+					exit[countExit] = new Door(i*32, j*32, 32, 32);
 					exitIsHere = 1;
+					countExit++;
 				}
 				else if(map.map[i][j] == "R")
 				{
+					//activator = new DoorActivator(i*32, j*32, 32, 32, exit);
 					activator.set(i*32, j*32);
 					activatorIsHere = 1;
 				}
@@ -330,7 +372,8 @@ public class TreasureThief extends Applet implements KeyListener, Runnable
 
 		if(exitIsHere == 0)
 		{
-			exit.set(32000, 32000);
+			for(Door doorExit: exit)
+				doorExit.set(32000, 32000);
 		}
 
 		if(activatorIsHere == 0)
@@ -348,6 +391,7 @@ public class TreasureThief extends Applet implements KeyListener, Runnable
 			thief.set(doorEnteredX*32, (doorEnteredY+1)*32);
 		else
 			thief.set(doorEnteredX*32, doorEnteredY*32);
+		
 	}
 
 	public void checkUserInput()
@@ -377,10 +421,17 @@ public class TreasureThief extends Applet implements KeyListener, Runnable
 						Treasure collected = chests.get(i);
 						thief.items.add(new Treasure(collected.id, collected.x, 
 								collected.y, "chest", 4, 4, 1, true));
-
+						score++;
 					}
 				}
 
+			}
+			
+			if(thief.hasCollidedWith(activator.rect)){
+				activator.setActive();
+				doorIsOpen = true;
+				for(Door doorExit : exit)
+					doorExit.set(32000, 32000);
 			}
 			ePressed = false;
 		}
@@ -400,8 +451,37 @@ public class TreasureThief extends Applet implements KeyListener, Runnable
 		   doorIsOpen = true;
 	   }
 		 */
+		checkCollisionWithDoors();
 		checkCollisionWithWalls();
 		checkCollisionWithGuards();
+	}
+
+	private void checkCollisionWithDoors() {
+		for(Door doorExit : exit){
+			if(doorExit.rect.hasCollidedWith(thief.rect))
+			{
+				if(thief.dir == 0)
+				{
+					thief.y += 4;
+					thief.rect.y += 4;
+				}
+				else if(thief.dir == 1)
+				{
+					thief.y -= 4;
+					thief.rect.y -= 4;
+				}
+				else if(thief.dir == 2)
+				{
+					thief.x -= 4;
+					thief.rect.x -= 4;
+				}
+				else if(thief.dir == 3)
+				{
+					thief.x += 4;
+					thief.rect.x += 4;
+				}
+			}
+		}
 	}
 
 	public void checkWhereYouAreOnMap()
@@ -425,6 +505,16 @@ public class TreasureThief extends Applet implements KeyListener, Runnable
 		}
 
 	}
+	
+	public void checkIfLevelComplete()
+	{
+		for(Door doorExit : exit)
+			if(thief.rect.hasCollidedWith(doorExit.phaseRect) && activator.isPressed())
+			{
+				LevelComplete();
+			}
+	}
+	
 	public void moveOtherObjects()
 	{
 		for(int i=0; i<guards.length; i++)
@@ -502,18 +592,18 @@ public class TreasureThief extends Applet implements KeyListener, Runnable
 	}
 
 	public void preGameSetUp()
-	{
+	{	
 		JComboBox cbox = new JComboBox();
 		cbox.addItem("1");
 		cbox.addItem("2");
 		cbox.addItem("3");
-
+	
 		jp.showOptionDialog(null, cbox,"Select Level",
 				JOptionPane.CLOSED_OPTION,  
 				JOptionPane.QUESTION_MESSAGE, null, null, null);
-
-
-		level = "Level" + cbox.getSelectedItem();
+	
+		CurrentLevel = cbox.getSelectedIndex() + 1;
+		level = "Level" + CurrentLevel;
 		gameover = false;
 	}
 
@@ -522,8 +612,8 @@ public class TreasureThief extends Applet implements KeyListener, Runnable
 		Object[] options1 = {"Play Again", "Show Score", "Exit"};
 
 		int m  = jp1.showOptionDialog(null,
+				"Score:" + thief.items.size(),
 				title,
-				"Menu",
 				JOptionPane.YES_NO_CANCEL_OPTION,
 				JOptionPane.PLAIN_MESSAGE,
 				null,
@@ -535,8 +625,8 @@ public class TreasureThief extends Applet implements KeyListener, Runnable
 		if(m == 0)
 		{
 			makeAllNull();
+			nextLevel = false;
 			initStart();
-
 		}
 
 		if(m == 2)
@@ -555,6 +645,51 @@ public class TreasureThief extends Applet implements KeyListener, Runnable
 		map = null;
 		guardStartX = null;
 		guardStartY = null;
+		chests = new ArrayList<Treasure>();
+		doorIsOpen = false;
+	}
+	
+	
+	public void NextLevel()
+	{
+		CurrentLevel++;
+		level = "Level" + CurrentLevel;
+	}
+	
+	public void LevelComplete()
+	{
+		Object[] options1 = {"Play Again", "Next Level", "Exit"};
+
+		int m  = jp1.showOptionDialog(null,
+				"Number of Chest:" + thief.items.size(),
+				"Level Complete ",
+				JOptionPane.YES_NO_CANCEL_OPTION,
+				JOptionPane.PLAIN_MESSAGE,
+				null,
+				options1,
+				null);
+
+		rGPressed = false;
+
+		if(m == 0)
+		{
+			makeAllNull();
+			nextLevel = false;
+			initStart();
+		}
+		
+		if(m == 1)
+		{
+			NextLevel();
+			makeAllNull();
+			nextLevel = true;
+			initStart();
+		}
+		
+		if(m == 2)
+		{
+			System.exit(0);
+		}
 	}
 }
 

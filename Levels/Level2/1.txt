@@ -4,7 +4,7 @@ A     B                       A
 A                       Z     A
 A                   B         A
 A     B             B         A
-A  Z  B             B         A
+A  Z  B             B   R     A
 AAAAAAAAAAAAA  AAAAAAAAAAAAAAAA
 A           B                 A
 A           B                 A
@@ -13,8 +13,8 @@ A                             A
 A                        Z    A
 AAAAAAAAAA  AAAAAAAAAAAAAAAAAAA
 A                             A
-2                             0
-2                B            0
+0                             A
+0                B            A
 A                B   BBBBBBBBBA
 A                B            A
 A                B            A
