@@ -44,5 +44,9 @@ public class DoorActivator extends Sprite
 	public void setActive() {
 		isPressed = true;
 	}
+	
+	public void setDisabled(){
+		isPressed = false;
+	}
 
 } 

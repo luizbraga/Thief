@@ -647,6 +647,7 @@ public class TreasureThief extends Applet implements KeyListener, Runnable
 		guardStartY = null;
 		chests = new ArrayList<Treasure>();
 		doorIsOpen = false;
+		activator.setDisabled();
 	}
 	
 	
