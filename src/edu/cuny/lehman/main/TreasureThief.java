@@ -229,11 +229,11 @@ public class TreasureThief extends Applet implements KeyListener, Runnable
 		
 		g.drawString("To Pause press G", 1010, 300);
 		
-		g.drawString("To Open Door", 1010, 400);
-		g.drawString("press R", 1010, 420);
+		g.drawString("To Interact", 1010, 400);
+		g.drawString("press E", 1010, 420);
 		
-		g.drawString("To open chest", 1010, 450);
-		g.drawString("press E", 1010, 470);
+//		g.drawString("To open chest", 1010, 450);
+//		g.drawString("press E", 1010, 470);
 		
 		
 	}
